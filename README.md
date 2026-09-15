@@ -57,6 +57,19 @@ language: an expired row has its deadline wrapped in `<del>` (struck through). S
 with a live deadline is still worth watching, because it can still turn green — while a
 struck-through one is history and is silenced permanently.
 
+### The seat count for a sold-out session is not in the page
+
+CISIA publishes a seat count only while a session is bookable. Once it sells out the cell
+becomes literally `<td class="center">---</td>` — the figure is not hidden in an attribute,
+a script, or a JSON payload. The page carries no `data-*` row attributes, no hidden inputs,
+no AJAX and no API; sorting and filtering are client-side over the already-rendered table.
+The only other endpoint on the site is the authenticated booking area.
+
+So the watcher records it instead: whenever a session is bookable it stores that count as
+`lastSeats`, and keeps it after the session sells out. The daily heartbeat can then report
+*"sold out — had 40 seats on 2026-09-28"*, which is the capacity information the page
+itself refuses to give you. Stale counts on expired rows are deliberately not recorded.
+
 And the seat number is never a signal. Expired rows keep a stale non-zero count (Siena
 renders `42` while closed) and sold-out rows render `---`. Reading `42` as availability
 would fire a false alert on nearly every closed session in the calendar.

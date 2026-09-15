@@ -185,6 +185,59 @@ test('a date that arrives already expired is not announced', () => {
   assert.equal(events.some((e) => e.type === EVENT.NEW_DATE), false);
 });
 
+// --- remembering seat counts the site stops publishing --------------------
+//
+// CISIA sends a seat count only while a session is bookable; once it sells out
+// the cell becomes "---" and the figure never leaves their backend. The only
+// way to report one is to have recorded it while it was still visible.
+
+test('a seat count seen while bookable is remembered after it sells out', () => {
+  const seeded = stateFrom([open({ seats: 40 })]);
+  assert.equal(seeded.rows[open().key].lastSeats, 40);
+
+  // Sells out: the site now renders "---", so seats parses as null.
+  const soldOut = diffRows(seeded, [row()]);
+  const snap = soldOut.nextRows[row().key];
+
+  assert.equal(snap.seats, null, 'the site publishes no count once sold out');
+  assert.equal(snap.lastSeats, 40, 'but we still know it had 40');
+  assert.match(snap.lastSeatsOn, /^\d{4}-\d{2}-\d{2}$/);
+});
+
+test('the remembered count survives repeated sold-out checks', () => {
+  let state = stateFrom([open({ seats: 12 })]);
+  for (let i = 0; i < 3; i += 1) {
+    const result = diffRows(state, [row()]);
+    state = { rows: result.nextRows, dates: result.nextDates };
+  }
+  assert.equal(state.rows[row().key].lastSeats, 12);
+});
+
+test('a fresh count overwrites the remembered one', () => {
+  const seeded = stateFrom([open({ seats: 40 })]);
+  const reopened = diffRows(seeded, [open({ seats: 3 })]);
+  assert.equal(reopened.nextRows[open().key].lastSeats, 3);
+});
+
+test('a stale count on an expired row is not mistaken for real availability', () => {
+  // Expired rows keep a leftover number; it must not be recorded as a count
+  // seen while bookable.
+  const expired = row({
+    availability: AVAILABILITY.EXPIRED,
+    deadlineExpired: true,
+    seats: 42,
+    label: 'ISCRIZIONI CONCLUSE',
+  });
+  const { nextRows } = diffRows(stateFrom([row()]), [expired]);
+  assert.equal(nextRows[row().key].lastSeats, null);
+});
+
+test('a session never seen bookable has no remembered count', () => {
+  const seeded = stateFrom([row()]);
+  assert.equal(seeded.rows[row().key].lastSeats, null);
+  assert.equal(seeded.rows[row().key].lastSeatsOn, null);
+});
+
 // --- filtering ------------------------------------------------------------
 
 test('filter keeps CENT@HOME and drops CENT@UNI', () => {

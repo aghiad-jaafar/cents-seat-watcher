@@ -43,9 +43,26 @@ export function emptyState() {
   };
 }
 
-/** Snapshot the parts of a row worth persisting. */
-function snapshot(row) {
-  return { availability: row.availability, seats: row.seats };
+/**
+ * Snapshot the parts of a row worth persisting.
+ *
+ * The site publishes a seat count only while a session is bookable; once it
+ * sells out the cell becomes "---" and the real figure never leaves CISIA's
+ * backend. So we remember the last count seen while it WAS bookable, which is
+ * the only way to say "sold out now, but it had 40 seats" later on.
+ *
+ * `lastSeatsOn` is a date, not a timestamp, deliberately: a full timestamp
+ * would rewrite the state file on every run and produce a commit every five
+ * minutes.
+ */
+function snapshot(row, previous) {
+  const counted = isAvailable(row) && row.seats != null;
+  return {
+    availability: row.availability,
+    seats: row.seats,
+    lastSeats: counted ? row.seats : previous?.lastSeats ?? null,
+    lastSeatsOn: counted ? new Date().toISOString().slice(0, 10) : previous?.lastSeatsOn ?? null,
+  };
 }
 
 const bookable = (availability) =>
@@ -68,7 +85,7 @@ export function diffRows(previous, rows) {
   const isFirstRun = Object.keys(prevRows).length === 0;
 
   const nextRows = {};
-  for (const row of rows) nextRows[row.key] = snapshot(row);
+  for (const row of rows) nextRows[row.key] = snapshot(row, prevRows[row.key]);
 
   const nextDates = [...new Set(rows.map((r) => r.date))].sort(byDate);
 

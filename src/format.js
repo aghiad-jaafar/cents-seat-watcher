@@ -131,14 +131,40 @@ export function formatEmail(events, { calendarName = 'CEnT-S' } = {}) {
   };
 }
 
-export function formatHeartbeat({ calendarName, tracked, available, pending, matching }) {
-  return [
+/** Max watchlist entries in a heartbeat, so the message stays glanceable. */
+const WATCHLIST_LIMIT = 8;
+
+/**
+ * `watchlist` entries are the filtered sessions that are still in play, each
+ * optionally carrying the last seat count observed while it was bookable -
+ * CISIA never publishes a count for a sold-out session, so this is the only
+ * way to show one.
+ */
+export function formatHeartbeat({ calendarName, tracked, available, pending, matching, watchlist = [] }) {
+  const lines = [
     `<b>\u{1F493} Watcher alive</b>`,
     `${escapeHtml(calendarName)}: ${tracked} live sessions tracked.`,
     `${available} bookable now, ${pending} waiting to open or sold out.`,
     `${matching} bookable session(s) match your filter.`,
-    `No news is good news — you will be pinged the moment that changes.`,
-  ].join('\n');
+  ];
+
+  if (watchlist.length > 0) {
+    lines.push('', '<b>Your watchlist</b>');
+    for (const item of watchlist.slice(0, WATCHLIST_LIMIT)) {
+      const history =
+        item.lastSeats != null
+          ? ` · had ${item.lastSeats} seat(s) on ${escapeHtml(item.lastSeatsOn)}`
+          : '';
+      const status = AVAILABILITY_LABEL[item.availability] ?? item.availability;
+      lines.push(`  • ${escapeHtml(item.date)} ${escapeHtml(item.city)} — ${escapeHtml(status)}${history}`);
+    }
+    if (watchlist.length > WATCHLIST_LIMIT) {
+      lines.push(`  • …and ${watchlist.length - WATCHLIST_LIMIT} more`);
+    }
+  }
+
+  lines.push('', `No news is good news — you will be pinged the moment that changes.`);
+  return lines.join('\n');
 }
 
 export function formatFailureWarning(calendarName, failures, lastError) {

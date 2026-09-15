@@ -184,6 +184,20 @@ async function maybeHeartbeat(state, config, rowsByCalendar) {
   for (const [calendarName, rows] of Object.entries(rowsByCalendar)) {
     // Expired rows are noise in a status report; count only what can still change.
     const live = rows.filter((r) => !isExpired(r));
+    const snapshots = state.calendars[calendarName]?.rows ?? {};
+
+    // Sessions you care about that have not happened yet, annotated with the
+    // last seat count we saw while they were bookable.
+    const watchlist = live
+      .filter((r) => matchesFilter(r, config.filter))
+      .map((r) => ({
+        date: r.date,
+        city: r.city,
+        availability: r.availability,
+        lastSeats: r.seats ?? snapshots[r.key]?.lastSeats ?? null,
+        lastSeatsOn: r.seats != null ? 'today' : snapshots[r.key]?.lastSeatsOn ?? null,
+      }));
+
     await notify(
       formatHeartbeat({
         calendarName,
@@ -191,6 +205,7 @@ async function maybeHeartbeat(state, config, rowsByCalendar) {
         available: live.filter(isAvailable).length,
         pending: live.filter(isPending).length,
         matching: live.filter((r) => isAvailable(r) && matchesFilter(r, config.filter)).length,
+        watchlist,
       }),
     );
   }
