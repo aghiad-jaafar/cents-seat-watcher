@@ -19,7 +19,8 @@ export async function sendTelegram(messages, { env = process.env, log = () => {}
     throw new Error('TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must both be set');
   }
 
-  const url = `${API_BASE}/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
+  // Overridable so tests can exercise the real request against a local stub.
+  const url = `${env.TELEGRAM_API_BASE ?? API_BASE}/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`;
   let sent = 0;
 
   for (const text of list) {

@@ -117,7 +117,18 @@ live in encrypted Actions secrets either way, never in the code.
 TELEGRAM_BOT_TOKEN=123456:AA... npm run telegram:chatid
 ```
 
-### 3. Add repository secrets
+### 3. Confirm delivery works
+
+Before trusting it to wake you at 3am, send yourself a sample alert:
+
+```bash
+TELEGRAM_BOT_TOKEN=123:AA... TELEGRAM_CHAT_ID=99887766 npm run telegram:test
+```
+
+If that arrives on your phone, the same two values will work as GitHub secrets.
+
+### 4. Add repository secrets
+
 
 **Settings → Secrets and variables → Actions**
 
@@ -128,7 +139,7 @@ TELEGRAM_BOT_TOKEN=123456:AA... npm run telegram:chatid
 | `WATCHER_PAT` | recommended | keeps the cron alive (see below) |
 | `SMTP_USER` / `SMTP_PASS` / `ALERT_EMAIL_TO` | no | enables the optional email channel |
 
-### 4. Arm it
+### 5. Arm it
 
 Enable Actions, then run **Check CEnT-S seats → Run workflow** once. The first run adopts
 the current calendar as its baseline, stays quiet about it, and sends a single "Watcher
@@ -187,7 +198,7 @@ Without that secret the workflow warns you; GitHub also emails before disabling.
 ## Local development
 
 ```bash
-npm test              # 45 tests against two saved copies of the real pages
+npm test              # 58 tests, incl. the Telegram path against a stubbed Bot API
 npm run check:dry     # hit the live site, print what would be sent, change nothing
 npm run check:once    # one real check, including notifications
 ```

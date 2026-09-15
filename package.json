@@ -12,7 +12,8 @@
     "check:once": "node src/index.js --once",
     "check:dry": "node src/index.js --once --dry-run",
     "telegram:chatid": "node scripts/telegram-chatid.js",
-    "test": "node --test"
+    "test": "node --test",
+    "telegram:test": "node scripts/send-sample-alert.js"
   },
   "optionalDependencies": {
     "nodemailer": "^10.0.0"
