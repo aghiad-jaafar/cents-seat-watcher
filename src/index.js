@@ -16,8 +16,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { fetchCalendar } from './fetchCalendar.js';
-import { parseCalendar, isAvailable } from './parse.js';
-import { diffRows, emptyState, emptyCalendarState } from './diff.js';
+import { parseCalendar, isAvailable, isPending, isExpired } from './parse.js';
+import { diffRows, emptyState, emptyCalendarState, STATE_VERSION } from './diff.js';
 import { filterEvents, matchesFilter } from './filter.js';
 import {
   formatTelegram,
@@ -58,6 +58,15 @@ function loadState() {
   const state = loadJson(STATE_PATH, emptyState());
   state.calendars ??= {};
   state.consecutiveFailures ??= 0;
+
+  // What a stored snapshot means changed in v2 (an availability class derived
+  // from colour, rather than the raw label). Re-seed rather than diff against
+  // incomparable data, which would fire a flood of bogus transitions.
+  if (state.version !== STATE_VERSION) {
+    log(`state is v${state.version ?? 'unknown'}, expected v${STATE_VERSION}; re-seeding baseline`);
+    state.version = STATE_VERSION;
+    state.calendars = {};
+  }
   return state;
 }
 
@@ -102,8 +111,9 @@ async function checkCalendar(calendar, state, config) {
     const html = await fetchCalendar(calendar.url, { log });
     const parsed = parseCalendar(html);
     rows = parsed.rows;
-    if (parsed.unknownStates.length > 0) {
-      log(`NOTE: unrecognised STATE values seen: ${parsed.unknownStates.join(', ')}`);
+    if (parsed.unknownColours.length > 0) {
+      // An unseen colour is classified as bookable, erring towards alerting.
+      log(`NOTE: unrecognised STATE colour(s): ${parsed.unknownColours.join(', ')}`);
     }
   } catch (error) {
     // Deliberately do NOT touch rows/dates here. Overwriting the baseline with
@@ -137,18 +147,20 @@ async function checkCalendar(calendar, state, config) {
   const alerts = filterEvents(events, config);
 
   log(
-    `${name}: ${rows.length} rows, ${rows.filter(isAvailable).length} bookable, ` +
+    `${name}: ${rows.length} rows (${rows.filter(isAvailable).length} bookable, ` +
+      `${rows.filter(isPending).length} pending, ${rows.filter(isExpired).length} expired), ` +
       `${events.length} change(s), ${alerts.length} alert(s)`,
   );
 
   if (seeded) {
-    const matching = rows.filter((r) => isAvailable(r) && matchesFilter(r, config.filter)).length;
+    const mine = rows.filter((r) => matchesFilter(r, config.filter));
     log(`${name}: first run - adopting ${rows.length} rows as the baseline, staying quiet`);
     const armed =
       `<b>✅ Watcher armed</b>\n` +
-      `${name}: baseline set from ${rows.length} sessions ` +
-      `(${rows.filter(isAvailable).length} bookable, ${matching} matching your filter).\n` +
-      `You will be pinged when a seat frees up.`;
+      `${name}: baseline set from ${rows.length} sessions.\n` +
+      `Matching your filter: ${mine.filter(isAvailable).length} bookable now, ` +
+      `${mine.filter(isPending).length} still live (sold out or not yet open).\n` +
+      `You will be pinged when any of them turns green.`;
     await notify(armed);
     // The "armed" message is itself proof of life; don't follow it with a heartbeat.
     state.lastHeartbeatAt = new Date().toISOString();
@@ -170,12 +182,15 @@ async function maybeHeartbeat(state, config, rowsByCalendar) {
   if (Number.isFinite(last) && last > 0 && Date.now() - last < hours * 3_600_000) return false;
 
   for (const [calendarName, rows] of Object.entries(rowsByCalendar)) {
+    // Expired rows are noise in a status report; count only what can still change.
+    const live = rows.filter((r) => !isExpired(r));
     await notify(
       formatHeartbeat({
         calendarName,
-        tracked: rows.length,
-        available: rows.filter(isAvailable).length,
-        matching: rows.filter((r) => isAvailable(r) && matchesFilter(r, config.filter)).length,
+        tracked: live.length,
+        available: live.filter(isAvailable).length,
+        pending: live.filter(isPending).length,
+        matching: live.filter((r) => isAvailable(r) && matchesFilter(r, config.filter)).length,
       }),
     );
   }

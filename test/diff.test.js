@@ -4,17 +4,19 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { parseCalendar, AVAILABLE, FULL, CLOSED } from '../src/parse.js';
+import { parseCalendar, AVAILABILITY } from '../src/parse.js';
 import { diffRows, emptyCalendarState, EVENT } from '../src/diff.js';
 import { filterEvents, matchesFilter, shouldAlert } from '../src/filter.js';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const FIXTURE = fs.readFileSync(path.join(HERE, 'fixtures', 'cents-2026-09-15.html'), 'utf8');
-const { rows: LIVE_ROWS } = parseCalendar(FIXTURE);
+const CENTS = fs.readFileSync(path.join(HERE, 'fixtures', 'cents-2026-09-15.html'), 'utf8');
+const { rows: LIVE_ROWS } = parseCalendar(CENTS);
 
 const CONFIG = {
   filter: { formats: ['CENT@HOME'], universities: [], cities: [] },
   alertOnNewDate: true,
+  alertOnNotYetOpen: true,
+  alertOnRunningLow: true,
   alertOnSeatIncrease: true,
   alertOnClose: false,
 };
@@ -31,14 +33,20 @@ const row = (over = {}) => ({
   region: 'FRIULI-VENEZIA GIULIA',
   city: 'UDINE',
   deadline: '09/10/2026',
+  deadlineExpired: false,
   seats: null,
-  state: FULL,
+  label: 'POSTI ESAURITI',
+  colour: 'crimson',
+  availability: AVAILABILITY.FULL,
   date: '15/10/2026',
   dateISO: '2026-10-15',
   bookingUrl: null,
   key: 'CENT@HOME|Universita degli studi di Udine|UDINE|15/10/2026',
   ...over,
 });
+
+const open = (over = {}) =>
+  row({ availability: AVAILABILITY.OPEN, colour: 'limegreen', seats: 12, bookingUrl: 'https://x', ...over });
 
 test('first run seeds silently instead of alerting on the whole calendar', () => {
   const result = diffRows(emptyCalendarState(), LIVE_ROWS);
@@ -49,43 +57,94 @@ test('first run seeds silently instead of alerting on the whole calendar', () =>
 });
 
 test('an unchanged calendar produces no events (dedup)', () => {
-  const { events } = diffRows(stateFrom(LIVE_ROWS), LIVE_ROWS);
-  assert.equal(events.length, 0);
+  assert.equal(diffRows(stateFrom(LIVE_ROWS), LIVE_ROWS).events.length, 0);
 });
 
-test('a seat freeing up fires exactly one BECAME_AVAILABLE, then goes quiet', () => {
-  const before = [row({ state: FULL, seats: null })];
-  const after = [row({ state: AVAILABLE, seats: 3 })];
-
-  const first = diffRows(stateFrom(before), after);
+test('a seat freeing up fires exactly one alert, then goes quiet', () => {
+  const first = diffRows(stateFrom([row()]), [open({ seats: 3 })]);
   assert.equal(first.events.length, 1);
   assert.equal(first.events[0].type, EVENT.BECAME_AVAILABLE);
 
-  // Re-running against the same reality must stay silent.
-  const second = diffRows({ rows: first.nextRows, dates: first.nextDates }, after);
+  const second = diffRows({ rows: first.nextRows, dates: first.nextDates }, [open({ seats: 3 })]);
   assert.equal(second.events.length, 0);
 });
 
-test('a closed row keeping stale seats never fires an alert', () => {
-  const before = [row({ state: CLOSED, seats: 42 })];
-  const after = [row({ state: CLOSED, seats: 42 })];
-  assert.equal(diffRows(stateFrom(before), after).events.length, 0);
+test('a not-yet-open session turning green alerts', () => {
+  const before = [row({ availability: AVAILABILITY.NOT_OPEN, label: 'ISCRIZIONI CHIUSE' })];
+  const { events } = diffRows(stateFrom(before), [open({ seats: 40 })]);
+
+  assert.equal(events.length, 1);
+  assert.equal(events[0].type, EVENT.BECAME_AVAILABLE);
+});
+
+// The case that is invisible if you only watch for green.
+test('a newly discovered session with bookings not yet open is reported', () => {
+  const existing = row({ key: 'existing' });
+  const pending = row({
+    key: 'CENT@HOME|Uni Nuova|MILANO|20/11/2026',
+    university: 'Uni Nuova',
+    city: 'MILANO',
+    date: '20/11/2026',
+    availability: AVAILABILITY.NOT_OPEN,
+    label: 'ISCRIZIONI CHIUSE',
+  });
+
+  const { events } = diffRows(stateFrom([existing]), [existing, pending]);
+  const found = events.find((e) => e.type === EVENT.NEW_ROW_PENDING);
+
+  assert.ok(found, 'a session whose bookings have not opened should be surfaced');
+  assert.equal(found.row.city, 'MILANO');
+  assert.equal(shouldAlert(found, CONFIG), true);
+  assert.equal(shouldAlert(found, { ...CONFIG, alertOnNotYetOpen: false }), false);
+});
+
+test('a newly discovered sold-out session is not reported as pending news', () => {
+  const existing = row({ key: 'existing' });
+  const soldOut = row({ key: 'other', city: 'BARI', availability: AVAILABILITY.FULL });
+
+  const { events } = diffRows(stateFrom([existing]), [existing, soldOut]);
+  assert.equal(events.some((e) => e.type === EVENT.NEW_ROW_PENDING), false);
+});
+
+test('green turning orange warns that seats are running out', () => {
+  const before = [open({ seats: 30 })];
+  const after = [open({ seats: 4, availability: AVAILABILITY.OPEN_LIMITED, colour: 'orange' })];
+
+  const { events } = diffRows(stateFrom(before), after);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].type, EVENT.RUNNING_LOW);
+  assert.equal(shouldAlert(events[0], CONFIG), true);
+});
+
+test('orange is still bookable, so it never counts as losing availability', () => {
+  const before = [open({ seats: 30 })];
+  const after = [open({ seats: 4, availability: AVAILABILITY.OPEN_LIMITED, colour: 'orange' })];
+  const { events } = diffRows(stateFrom(before), after);
+  assert.notEqual(events[0].type, EVENT.BECAME_UNAVAILABLE);
+});
+
+test('expired rows never generate events', () => {
+  const before = [open({ seats: 5 })];
+  const after = [
+    row({ availability: AVAILABILITY.EXPIRED, deadlineExpired: true, label: 'ISCRIZIONI CONCLUSE', seats: 5 }),
+  ];
+  const { events } = diffRows(stateFrom(before), after);
+  assert.equal(events.length, 0, 'a passed deadline is not news');
 });
 
 test('seat increases and decreases are treated differently', () => {
-  const before = [row({ state: AVAILABLE, seats: 2 })];
+  const before = [open({ seats: 2 })];
 
-  const up = diffRows(stateFrom(before), [row({ state: AVAILABLE, seats: 5 })]);
+  const up = diffRows(stateFrom(before), [open({ seats: 5 })]);
   assert.equal(up.events[0].type, EVENT.SEATS_INCREASED);
   assert.equal(up.events[0].previous.seats, 2);
 
-  const down = diffRows(stateFrom(before), [row({ state: AVAILABLE, seats: 1 })]);
+  const down = diffRows(stateFrom(before), [open({ seats: 1 })]);
   assert.equal(down.events.length, 0, 'someone else booking is not news');
 });
 
 test('losing availability is detected but silent by default', () => {
-  const before = [row({ state: AVAILABLE, seats: 5 })];
-  const { events } = diffRows(stateFrom(before), [row({ state: FULL, seats: null })]);
+  const { events } = diffRows(stateFrom([open({ seats: 5 })]), [row()]);
 
   assert.equal(events[0].type, EVENT.BECAME_UNAVAILABLE);
   assert.equal(filterEvents(events, CONFIG).length, 0);
@@ -95,7 +154,7 @@ test('losing availability is detected but silent by default', () => {
 test('a brand new bookable session alerts', () => {
   const { events } = diffRows(stateFrom([row()]), [
     row(),
-    row({ key: 'CENT@HOME|Uni Nuova|MILANO|15/10/2026', university: 'Uni Nuova', city: 'MILANO', state: AVAILABLE, seats: 9 }),
+    open({ key: 'CENT@HOME|Uni Nuova|MILANO|15/10/2026', university: 'Uni Nuova', city: 'MILANO', seats: 9 }),
   ]);
   assert.equal(events.length, 1);
   assert.equal(events[0].type, EVENT.NEW_ROW_AVAILABLE);
@@ -104,14 +163,29 @@ test('a brand new bookable session alerts', () => {
 test('a newly published test date is reported even if not yet bookable', () => {
   const { events } = diffRows(stateFrom([row()]), [
     row(),
-    row({ key: 'CENT@HOME|Uni X|ROMA|20/11/2026', city: 'ROMA', date: '20/11/2026', state: FULL }),
+    row({ key: 'CENT@HOME|Uni X|ROMA|20/11/2026', city: 'ROMA', date: '20/11/2026' }),
   ]);
 
   const newDate = events.find((e) => e.type === EVENT.NEW_DATE);
   assert.ok(newDate);
   assert.equal(newDate.date, '20/11/2026');
-  assert.equal(newDate.rows.length, 1);
 });
+
+test('a date that arrives already expired is not announced', () => {
+  const { events } = diffRows(stateFrom([row()]), [
+    row(),
+    row({
+      key: 'CENT@HOME|Uni X|ROMA|01/01/2026',
+      city: 'ROMA',
+      date: '01/01/2026',
+      availability: AVAILABILITY.EXPIRED,
+      deadlineExpired: true,
+    }),
+  ]);
+  assert.equal(events.some((e) => e.type === EVENT.NEW_DATE), false);
+});
+
+// --- filtering ------------------------------------------------------------
 
 test('filter keeps CENT@HOME and drops CENT@UNI', () => {
   assert.equal(matchesFilter(row({ format: 'CENT@HOME' }), CONFIG.filter), true);
@@ -128,9 +202,9 @@ test('university and city filters match case-insensitive substrings', () => {
   assert.equal(matchesFilter(row({ university: 'Politecnico di Milano' }), filter), false);
 });
 
-test('CENT@UNI availability is filtered out of alerts under the current config', () => {
-  const before = [row({ format: 'CENT@UNI', key: 'uni-key', state: FULL })];
-  const after = [row({ format: 'CENT@UNI', key: 'uni-key', state: AVAILABLE, seats: 7 })];
+test('CENT@UNI availability is tracked but filtered out of alerts', () => {
+  const before = [row({ format: 'CENT@UNI', key: 'uni-key' })];
+  const after = [open({ format: 'CENT@UNI', key: 'uni-key', seats: 7 })];
 
   const { events } = diffRows(stateFrom(before), after);
   assert.equal(events.length, 1, 'the change is still tracked...');

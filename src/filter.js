@@ -30,6 +30,10 @@ function typeEnabled(type, config) {
     case EVENT.BECAME_AVAILABLE:
     case EVENT.NEW_ROW_AVAILABLE:
       return true;
+    case EVENT.NEW_ROW_PENDING:
+      return config.alertOnNotYetOpen !== false;
+    case EVENT.RUNNING_LOW:
+      return config.alertOnRunningLow !== false;
     case EVENT.SEATS_INCREASED:
       return config.alertOnSeatIncrease !== false;
     case EVENT.NEW_DATE:

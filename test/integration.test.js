@@ -44,6 +44,22 @@ function withFreedHomeSeat(html) {
   throw new Error('fixture must contain a fully-booked CENT@HOME row to free up');
 }
 
+/**
+ * Inject a CENT@HOME session whose bookings have not been opened yet: red,
+ * no seat count, and crucially a deadline that is NOT struck through.
+ * Reuses an existing test date so this cannot be mistaken for a new date.
+ */
+function withUnopenedHomeSession(html) {
+  const injected =
+    "<tr><td>CENT@HOME</td><td>Universita di Prova</td><td>LAZIO</td><td>ROMA</td>" +
+    "<td>09/10/2026</td><td class=\"center\">---</td>" +
+    "<td class=\"center\"><span style=\"color: Crimson;font-weight:bold;text-decoration: underline;\" " +
+    "title='ISCRIZIONI CHIUSE'>ISCRIZIONI CHIUSE</span></td><td>15/10/2026</td></tr>";
+
+  assert.ok(html.includes('<tr style='), 'fixture shape changed');
+  return html.replace('<tr style=', `${injected}<tr style=`);
+}
+
 async function startServer(getBody) {
   const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
@@ -107,6 +123,47 @@ test('end to end: alerts once when a seat frees up, then stays quiet', async (t)
   assert.match(freed.stdout, /1 change\(s\), 1 alert\(s\)/);
 
   // 3. Nothing changed since -> silence. This is the dedup guarantee.
+  const quiet = await exec();
+  assert.match(quiet.stdout, /0 change\(s\), 0 alert\(s\)/);
+});
+
+test('end to end: a session that exists but is not open yet is reported', async (t) => {
+  let body = FIXTURE;
+  const { server, url } = await startServer(() => body);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cents-e2e-'));
+
+  t.after(async () => {
+    server.close();
+    await once(server, 'close');
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  const configPath = path.join(dir, 'config.json');
+  const statePath = path.join(dir, 'seen.json');
+  fs.writeFileSync(
+    configPath,
+    JSON.stringify({
+      calendars: [{ name: 'CEnT-S', url }],
+      filter: { formats: ['CENT@HOME'], universities: [], cities: [] },
+      alertOnNotYetOpen: true,
+      heartbeatHours: 0,
+    }),
+  );
+
+  const env = { ...process.env, WATCHER_CONFIG: configPath, WATCHER_STATE: statePath, TELEGRAM_BOT_TOKEN: '', TELEGRAM_CHAT_ID: '' };
+  const exec = () => run(process.execPath, [ENTRY, '--once'], { env });
+
+  await exec();
+
+  body = withUnopenedHomeSession(FIXTURE);
+  const found = await exec();
+
+  assert.match(found.stdout, /27 rows/, 'the injected session should be parsed');
+  assert.match(found.stdout, /1 change\(s\), 1 alert\(s\)/);
+
+  // It is counted as pending, not bookable: it must not be sold as a free seat.
+  assert.match(found.stdout, /\(3 bookable, 7 pending/);
+
   const quiet = await exec();
   assert.match(quiet.stdout, /0 change\(s\), 0 alert\(s\)/);
 });

@@ -6,11 +6,15 @@
     }
   ],
   "filter": {
-    "formats": ["CENT@HOME"],
+    "formats": [
+      "CENT@HOME"
+    ],
     "universities": [],
     "cities": []
   },
   "alertOnNewDate": true,
+  "alertOnNotYetOpen": true,
+  "alertOnRunningLow": true,
   "alertOnSeatIncrease": true,
   "alertOnClose": false,
   "heartbeatHours": 24
