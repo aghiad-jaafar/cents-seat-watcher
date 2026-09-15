@@ -1,0 +1,21 @@
+{
+  "name": "cents-seat-watcher",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Watches the CISIA CEnT-S booking calendar and pushes a Telegram alert the moment a seat frees up.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node src/index.js",
+    "check:once": "node src/index.js --once",
+    "check:dry": "node src/index.js --once --dry-run",
+    "telegram:chatid": "node scripts/telegram-chatid.js",
+    "test": "node --test"
+  },
+  "optionalDependencies": {
+    "nodemailer": "^10.0.0"
+  },
+  "license": "MIT"
+}

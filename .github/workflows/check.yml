@@ -1,0 +1,85 @@
+name: Check CEnT-S seats
+
+on:
+  schedule:
+    # Every 5 minutes. GitHub's scheduler is best-effort and often runs late
+    # under load, which is why each run also polls a few times internally.
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Parse and diff only - send nothing, save nothing'
+        type: boolean
+        default: false
+
+# Never let two runs race on the state file.
+concurrency:
+  group: cents-watcher
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Secrets are lifted to job-level env because the `secrets` context is not
+    # available in a step-level `if:`, but `env` is.
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      SMTP_USER: ${{ secrets.SMTP_USER }}
+      SMTP_PASS: ${{ secrets.SMTP_PASS }}
+      ALERT_EMAIL_TO: ${{ secrets.ALERT_EMAIL_TO }}
+      POLL_ITERATIONS: '3'
+      POLL_INTERVAL_SEC: '90'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Only needed for the optional email channel; the Telegram path has no deps.
+      - name: Install optional email dependency
+        if: env.SMTP_USER != ''
+        run: npm install --no-save nodemailer
+
+      - name: Watch for free seats
+        id: watch
+        continue-on-error: true
+        run: node src/index.js ${{ inputs.dry_run && '--once --dry-run' || '' }}
+
+      # Runs even if the check failed, so a bumped failure counter is not lost.
+      - name: Commit updated state
+        if: always()
+        run: |
+          if [ -z "$(git status --porcelain state/)" ]; then
+            echo "State unchanged; nothing to commit."
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add state/
+          git commit -m 'chore(state): update calendar baseline [skip ci]'
+          for attempt in 1 2 3; do
+            if git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push; then
+              echo "State pushed on attempt ${attempt}."
+              exit 0
+            fi
+            echo "Push attempt ${attempt} failed; retrying."
+            sleep 5
+          done
+          echo "::error::Could not push the updated state file."
+          exit 1
+
+      # Surface the failure only after state has been safely committed, so the
+      # run goes red and GitHub emails you.
+      - name: Report check failure
+        if: steps.watch.outcome == 'failure'
+        run: |
+          echo "::error::The seat check failed - see the 'Watch for free seats' step."
+          exit 1

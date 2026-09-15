@@ -1,0 +1,17 @@
+{
+  "calendars": [
+    {
+      "name": "CEnT-S",
+      "url": "https://testcisia.it/calendario.php?tolc=cents&l=gb&lingua=inglese"
+    }
+  ],
+  "filter": {
+    "formats": ["CENT@HOME"],
+    "universities": [],
+    "cities": []
+  },
+  "alertOnNewDate": true,
+  "alertOnSeatIncrease": true,
+  "alertOnClose": false,
+  "heartbeatHours": 24
+}

@@ -1,0 +1,41 @@
+# GitHub disables scheduled workflows in a repository with no activity for 60
+# days. Commits made with the default GITHUB_TOKEN do NOT count as activity, so
+# the watcher's own state commits will not save it - this pushes an empty commit
+# with a personal access token, which does count.
+name: Keepalive
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      WATCHER_PAT: ${{ secrets.WATCHER_PAT }}
+
+    steps:
+      - name: Warn if no PAT is configured
+        if: env.WATCHER_PAT == ''
+        run: |
+          echo "::warning::WATCHER_PAT is not set, so this keepalive cannot reset"
+          echo "::warning::the 60-day inactivity timer. Add a fine-grained PAT with"
+          echo "::warning::Contents: read and write, or push to the repo yourself"
+          echo "::warning::every couple of months."
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.WATCHER_PAT || github.token }}
+
+      - name: Push an empty commit
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git commit --allow-empty -m 'chore: keepalive to prevent workflow auto-disable [skip ci]'
+          git push
