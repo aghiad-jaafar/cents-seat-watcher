@@ -6,6 +6,8 @@ computer switched off.
 
 Runs entirely on GitHub Actions. No server, no hosting bill, no browser left open.
 
+See **[STATUS.md](STATUS.md)** for current progress, what was learned about the site, and the remaining setup steps.
+
 ## The problem
 
 CEnT-S is the entry test for admission to English-taught degree courses at Italian
