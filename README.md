@@ -116,7 +116,8 @@ live in encrypted Actions secrets either way, never in the code.
 3. Find your chat id:
 
 ```bash
-TELEGRAM_BOT_TOKEN=123456:AA... npm run telegram:chatid
+cp .env.example .env   # then put your token in it
+npm run telegram:chatid
 ```
 
 ### 3. Confirm delivery works
@@ -124,7 +125,7 @@ TELEGRAM_BOT_TOKEN=123456:AA... npm run telegram:chatid
 Before trusting it to wake you at 3am, send yourself a sample alert:
 
 ```bash
-TELEGRAM_BOT_TOKEN=123:AA... TELEGRAM_CHAT_ID=99887766 npm run telegram:test
+npm run telegram:test
 ```
 
 If that arrives on your phone, the same two values will work as GitHub secrets.

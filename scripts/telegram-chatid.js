@@ -4,15 +4,19 @@
  *
  * Usage:
  *   1. Create a bot: message @BotFather on Telegram, send /newbot, copy the token.
- *   2. Send your new bot any message (say "hi") so it has an update to report.
- *   3. TELEGRAM_BOT_TOKEN=123:abc npm run telegram:chatid
+ *   2. Put it in .env as TELEGRAM_BOT_TOKEN=... (copy .env.example to .env).
+ *   3. Send your new bot any message, so it has an update to report.
+ *   4. npm run telegram:chatid
  */
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 
 if (!token) {
-  console.error('Set TELEGRAM_BOT_TOKEN first, e.g.:');
-  console.error('  TELEGRAM_BOT_TOKEN=123456:AA... npm run telegram:chatid');
+  console.error('TELEGRAM_BOT_TOKEN is not set.');
+  console.error('');
+  console.error('  1. Copy .env.example to .env');
+  console.error('  2. Put your @BotFather token in it as TELEGRAM_BOT_TOKEN=...');
+  console.error('  3. Run this again');
   process.exit(1);
 }
 

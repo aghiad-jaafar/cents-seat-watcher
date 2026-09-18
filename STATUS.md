@@ -160,13 +160,14 @@ Message [@BotFather](https://t.me/BotFather) → `/newbot` → copy the token. S
 a message (it cannot message you first), then:
 
 ```bash
-TELEGRAM_BOT_TOKEN=paste-token npm run telegram:chatid
+cp .env.example .env   # then put your token in it
+npm run telegram:chatid
 ```
 
 ### 2. Confirm delivery
 
 ```bash
-TELEGRAM_BOT_TOKEN=paste-token TELEGRAM_CHAT_ID=paste-id npm run telegram:test
+npm run telegram:test
 ```
 
 A sample alert should reach your phone. Common failures are handled with explicit guidance:

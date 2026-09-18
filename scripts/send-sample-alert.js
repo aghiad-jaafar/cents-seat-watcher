@@ -4,7 +4,8 @@
  * trusting it to wake you at 3am.
  *
  * Usage:
- *   TELEGRAM_BOT_TOKEN=123:AA... TELEGRAM_CHAT_ID=99887766 npm run telegram:test
+ *   Put TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in .env, then:
+ *   npm run telegram:test
  */
 
 import { sendTelegram, telegramConfigured } from '../src/notify/telegram.js';
@@ -16,8 +17,7 @@ if (!telegramConfigured()) {
   console.error('Missing credentials. Both are required:\n');
   console.error('  TELEGRAM_BOT_TOKEN   from @BotFather');
   console.error('  TELEGRAM_CHAT_ID     from `npm run telegram:chatid`\n');
-  console.error('Example:');
-  console.error('  TELEGRAM_BOT_TOKEN=123:AA... TELEGRAM_CHAT_ID=99887766 npm run telegram:test');
+  console.error('Put both in .env (copy .env.example to .env), then run this again.');
   process.exit(1);
 }
 
