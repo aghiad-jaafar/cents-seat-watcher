@@ -29,7 +29,7 @@ jobs:
           echo "::warning::Contents: read and write, or push to the repo yourself"
           echo "::warning::every couple of months."
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           token: ${{ secrets.WATCHER_PAT || github.token }}
 
