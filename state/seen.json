@@ -1,7 +1,69 @@
 {
-  "version": 1,
-  "updatedAt": null,
-  "lastHeartbeatAt": null,
+  "version": 2,
+  "updatedAt": "2026-09-18T03:23:13.607Z",
+  "lastHeartbeatAt": "2026-09-18T03:20:11.876Z",
   "consecutiveFailures": 0,
-  "calendars": {}
+  "calendars": {
+    "CEnT-S": {
+      "rows": {
+        "CENT@UNI|Universita' degli studi di Brescia|BRESCIA|15/10/2026": {
+          "availability": "FULL",
+          "seats": null,
+          "lastSeats": null,
+          "lastSeatsOn": null
+        },
+        "CENT@UNI|Universita' di Siena - Economia|SIENA|15/10/2026": {
+          "availability": "OPEN",
+          "seats": 48,
+          "lastSeats": 48,
+          "lastSeatsOn": "2026-09-18"
+        },
+        "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
+          "availability": "OPEN_LIMITED",
+          "seats": 10,
+          "lastSeats": 10,
+          "lastSeatsOn": "2026-09-18"
+        },
+        "CENT@UNI|Universita' degli studi di Messina|MESSINA|15/10/2026": {
+          "availability": "FULL",
+          "seats": null,
+          "lastSeats": null,
+          "lastSeatsOn": null
+        },
+        "CENT@HOME|Sapienza Università di Roma|ROMA|15/10/2026": {
+          "availability": "FULL",
+          "seats": null,
+          "lastSeats": null,
+          "lastSeatsOn": null
+        },
+        "CENT@HOME|Università degli studi di Milano Bicocca|MILANO|15/10/2026": {
+          "availability": "FULL",
+          "seats": null,
+          "lastSeats": null,
+          "lastSeatsOn": null
+        },
+        "CENT@HOME|Università degli studi di Brescia|BRESCIA|15/10/2026": {
+          "availability": "FULL",
+          "seats": null,
+          "lastSeats": null,
+          "lastSeatsOn": null
+        },
+        "CENT@HOME|Università degli studi di Teramo|TERAMO|15/10/2026": {
+          "availability": "FULL",
+          "seats": null,
+          "lastSeats": null,
+          "lastSeatsOn": null
+        },
+        "CENT@UNI|Università degli studi di Udine|UDINE|15/10/2026": {
+          "availability": "OPEN",
+          "seats": 51,
+          "lastSeats": 51,
+          "lastSeatsOn": "2026-09-18"
+        }
+      },
+      "dates": [
+        "15/10/2026"
+      ]
+    }
+  }
 }
