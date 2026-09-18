@@ -1,7 +1,46 @@
 # Project status
 
-**Last updated:** 2026-09-17
-**State:** code complete and tested; not yet deployed — waiting on Telegram credentials.
+**Last updated:** 2026-09-18
+**State:** 🟢 **LIVE** — deployed to GitHub Actions, checking every 5 minutes.
+**Repo:** https://github.com/aghiad-jaafar/cents-seat-watcher
+
+---
+
+## Picking this back up later
+
+**Nothing needs restarting.** The watcher runs on GitHub's servers, not on this laptop. It
+keeps checking every 5 minutes whether or not the computer is on. Closing everything
+changes nothing.
+
+To work on the code again:
+
+1. Open a terminal — press Start, type `cmd`, press Enter
+2. Run: `cd C:\Users\ASUS\cents-seat-watcher`
+3. Run: `claude`
+4. Say: **"read STATUS.md, we're continuing the CEnT-S watcher"**
+
+That last step matters — a new session starts with no memory of the previous one. This
+file is the handover note.
+
+Useful commands from that folder:
+
+| Command | What it does |
+| --- | --- |
+| `npm run check:dry` | Show what the calendar says right now. Sends nothing, saves nothing. Always safe. |
+| `npm run telegram:test` | Send yourself a sample alert, to confirm Telegram still works. |
+| `npm test` | Run all 58 tests. |
+| `git log --oneline` | See what was changed and why. |
+
+**Do not delete `C:\Users\ASUS\cents-seat-watcher\.env`** — it holds the Telegram bot token
+and chat id, and it is deliberately not on GitHub, so it exists nowhere else. If it is ever
+lost: reissue the token with `/revoke` in @BotFather, and recover the chat id with
+`npm run telegram:chatid`.
+
+### Checking on it without touching anything
+
+- **Is it running?** https://github.com/aghiad-jaafar/cents-seat-watcher/actions — green ticks mean healthy.
+- **What has it seen?** `state/seen.json` in the repo; its commit history is a log of every calendar change.
+- **Is it alive?** The daily 💚 heartbeat on Telegram. If that stops arriving, something is wrong.
 
 ---
 
@@ -25,7 +64,7 @@ matter. The monitor therefore runs on **GitHub Actions**, on GitHub's servers, f
 
 ## Where we have reached
 
-Four commits, all work done on 2026-09-15, tree clean:
+Built 2026-09-15, deployed and live since 2026-09-18.
 
 | Commit | What it did |
 | --- | --- |
@@ -33,6 +72,11 @@ Four commits, all work done on 2026-09-15, tree clean:
 | `7b3fe9a` | Reworked availability detection to be driven by **status colour** |
 | `fe7f2f5` | Remember seat counts the calendar stops publishing |
 | `22d8c7f` | Covered the Telegram path; added a delivery self-test |
+| `b71f5af` | Added this status document |
+| `81e548d` | Load credentials from a gitignored `.env` rather than the command line |
+| `f16fdc5` | *(the watcher's own first commit — it saved its baseline unprompted)* |
+| `333719f` | Bumped Actions to v5, pinned Node 24 |
+| `6fdd6ae` | Rewrote the Telegram messages to be warm and readable |
 
 **58 tests, all passing.** Unit tests for parsing and diffing, end-to-end tests that drive
 the real entry point against a local stub of the CISIA site, and tests that drive a real
@@ -52,13 +96,23 @@ the real entry point against a local stub of the CISIA site, and tests that driv
 - [x] Keepalive workflow for GitHub's 60-day auto-disable rule
 - [x] README, tests, config file — presentable as a public portfolio repo
 
-### Not done — needs you
+- [x] Telegram bot created (`@Cents_test_watcher_bot`), delivery confirmed
+- [x] Pushed to a public GitHub repo, secrets added, workflow permissions set to read/write
+- [x] Armed — the watcher has run and committed its own baseline
+- [x] Messages rewritten to be readable rather than a data dump
 
-- [ ] Create the Telegram bot and get the chat id
-- [ ] Confirm delivery with `npm run telegram:test`
-- [ ] Create a **public** GitHub repo and push
-- [ ] Add repository secrets
-- [ ] Run the workflow once to arm it
+### Still outstanding — one thing
+
+- [ ] **Add a `WATCHER_PAT` secret** so the cron survives past 60 days.
+
+GitHub switches off scheduled workflows in repos with no activity for 60 days, and the
+watcher's own commits deliberately do not count. Without this it could go silent around
+**mid-November 2026**. Not urgent — the current test deadline is 09/10/2026 — but it matters
+if the watch needs to continue into a later CEnT-S macro-period.
+
+To do it: create a fine-grained token at https://github.com/settings/personal-access-tokens/new
+scoped to this repo only, with **Contents: read and write**, then add it as a secret named
+`WATCHER_PAT`.
 
 ---
 
@@ -152,9 +206,9 @@ row as "new" and flood you.
 
 ---
 
-## Next steps
+## How it was set up (all done - kept for reference)
 
-### 1. Create the Telegram bot
+### 1. Create the Telegram bot (DONE)
 
 Message [@BotFather](https://t.me/BotFather) → `/newbot` → copy the token. Send your new bot
 a message (it cannot message you first), then:
@@ -164,7 +218,7 @@ cp .env.example .env   # then put your token in it
 npm run telegram:chatid
 ```
 
-### 2. Confirm delivery
+### 2. Confirm delivery (DONE)
 
 ```bash
 npm run telegram:test
@@ -173,7 +227,7 @@ npm run telegram:test
 A sample alert should reach your phone. Common failures are handled with explicit guidance:
 `chat not found` means you have not messaged the bot; `Unauthorized` means a bad token.
 
-### 3. Push and arm
+### 3. Push and arm (DONE)
 
 Create a **public** repo (public gets unlimited Actions minutes; private gets 2,000/month,
 which a 5-minute cron would exhaust), then:
