@@ -101,6 +101,35 @@ only when deciding what to notify. That ordering matters — filtering before tr
 mean that widening your filter later replays every previously hidden row as "new" and
 floods you with alerts.
 
+### What an alert looks like
+
+```
+🎉 A SEAT JUST OPENED UP!
+Someone cancelled — this is your chance.
+
+📅  Thu, 15 Oct 2026
+🏠  From home (CENT@HOME)
+🏛️  Università degli studi di Brescia
+📍  Brescia, Lombardia
+🔥  Only 3 left!
+⏰  Book by Fri, 9 Oct 2026 (21 days left)
+
+👉 BOOK IT NOW
+
+⚡ Seats like this can vanish in minutes. Go now!
+```
+
+Dates are rendered as `Thu, 15 Oct 2026` rather than `15/10/2026`, so day and month cannot
+be misread. Deadlines carry the days remaining and escalate inside the last week — *only 3
+days left*, then *Closes TOMORROW*, then *Closes TODAY*. The 🔥 line appears only for
+orange sessions, so "few seats left" visibly shouts louder than an ordinary alert.
+
+**Test messages are wrapped in 🧪 banners, top and bottom.** Anything without them is real.
+That marking lives in its own function, `formatSampleAlert`, rather than riding on a header
+line — it previously rode on one, the header was removed during a redesign, and two sample
+alerts went out looking exactly like genuine free seats. Two tests now pin it: a sample must
+carry the banners, and a real alert must never contain the word "test".
+
 ## Setup
 
 ### 1. Create the repository
@@ -201,7 +230,7 @@ Without that secret the workflow warns you; GitHub also emails before disabling.
 ## Local development
 
 ```bash
-npm test              # 58 tests, incl. the Telegram path against a stubbed Bot API
+npm test              # 60 tests, incl. the Telegram path against a stubbed Bot API
 npm run check:dry     # hit the live site, print what would be sent, change nothing
 npm run check:once    # one real check, including notifications
 ```

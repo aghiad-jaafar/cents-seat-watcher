@@ -28,7 +28,7 @@ Useful commands from that folder:
 | --- | --- |
 | `npm run check:dry` | Show what the calendar says right now. Sends nothing, saves nothing. Always safe. |
 | `npm run telegram:test` | Send yourself a sample alert, to confirm Telegram still works. |
-| `npm test` | Run all 58 tests. |
+| `npm test` | Run all 60 tests. |
 | `git log --oneline` | See what was changed and why. |
 
 **Do not delete `C:\Users\ASUS\cents-seat-watcher\.env`** — it holds the Telegram bot token
@@ -77,8 +77,10 @@ Built 2026-09-15, deployed and live since 2026-09-18.
 | `f16fdc5` | *(the watcher's own first commit — it saved its baseline unprompted)* |
 | `333719f` | Bumped Actions to v5, pinned Node 24 |
 | `6fdd6ae` | Rewrote the Telegram messages to be warm and readable |
+| `cde92b4` | Updated this document now the watcher is live |
+| `5aa1844` | Fixed sample alerts being indistinguishable from real ones |
 
-**58 tests, all passing.** Unit tests for parsing and diffing, end-to-end tests that drive
+**60 tests, all passing.** Unit tests for parsing and diffing, end-to-end tests that drive
 the real entry point against a local stub of the CISIA site, and tests that drive a real
 `sendMessage` request against a local stub of the Telegram Bot API.
 
@@ -118,8 +120,8 @@ scoped to this repo only, with **Contents: read and write**, then add it as a se
 
 ## What we learned about the site (this shaped the design)
 
-Three findings changed the implementation. Each was verified against the live site, not
-assumed.
+Four things changed the implementation. The first three were verified against the live
+site rather than assumed; the fourth was a bug found in the field.
 
 ### 1. The page is trivially scrapeable
 
@@ -166,6 +168,23 @@ watcher now records that as `lastSeats` and retains it afterwards, so the heartb
 report *"sold out — had 40 seats on 2026-09-28"*. That is the capacity information the page
 refuses to give, derived by observation instead. Stale counts on expired rows are excluded,
 since those are leftovers rather than observed availability.
+
+---
+
+### 4. A silent failure mode worth remembering
+
+On 2026-09-18 two sample alerts were mistaken for real free seats. The sample used to mark
+itself by passing a calendar name of `CEnT-S (TEST)`, which the formatter printed as a
+header. A redesign removed that header, but the parameter carried on being accepted and
+silently discarded — nothing errored, the marking simply stopped appearing.
+
+Fixed by moving the marking into `formatSampleAlert`, which wraps the alert in 🧪 banners
+top and bottom, and by deleting the now-meaningless parameter rather than leaving a no-op
+that invites the same mistake. Two tests pin it in both directions.
+
+**The lesson for future changes:** a parameter that is accepted but unused is not harmless.
+If a formatting change drops something, make the old input fail loudly instead of being
+quietly ignored.
 
 ---
 
