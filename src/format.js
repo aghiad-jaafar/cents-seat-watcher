@@ -195,8 +195,15 @@ export function sortByUrgency(events) {
 
 /**
  * @returns {string[]} one or more Telegram-sized HTML messages
+ *
+ * Takes no calendar name on purpose. It used to accept one and print it as a
+ * header, which is how `npm run telegram:test` marked itself by passing
+ * "CEnT-S (TEST)". When the header was removed the parameter kept being
+ * accepted and silently ignored, so sample alerts became indistinguishable
+ * from real ones. Test marking now lives in formatSampleAlert, where it cannot
+ * be lost by a formatting change.
  */
-export function formatTelegram(events, { calendarName = 'CEnT-S' } = {}) {
+export function formatTelegram(events) {
   if (events.length === 0) return [];
   const blocks = sortByUrgency(events).map(renderEvent);
 
@@ -212,6 +219,25 @@ export function formatTelegram(events, { calendarName = 'CEnT-S' } = {}) {
     }
   }
   messages.push(current);
+  return messages;
+}
+
+/**
+ * Wraps a real alert in unmissable "this is only a test" banners, top and
+ * bottom, so a sample can never be mistaken for a genuine free seat.
+ */
+export function formatSampleAlert(events) {
+  const messages = formatTelegram(events);
+  if (messages.length === 0) return messages;
+
+  const top =
+    `\u{1F9EA} <b>TEST MESSAGE — NOT A REAL SEAT</b>\n` +
+    `<i>A sample, so you can see what a genuine alert looks like.</i>`;
+  const bottom =
+    `\u{1F9EA} <b>End of test.</b> <i>No seat is actually free — ignore everything above.</i>`;
+
+  messages[0] = `${top}\n\n${DIVIDER}\n\n${messages[0]}`;
+  messages[messages.length - 1] = `${messages[messages.length - 1]}\n\n${DIVIDER}\n\n${bottom}`;
   return messages;
 }
 

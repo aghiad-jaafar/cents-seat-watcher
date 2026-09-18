@@ -9,7 +9,7 @@
  */
 
 import { sendTelegram, telegramConfigured } from '../src/notify/telegram.js';
-import { formatTelegram } from '../src/format.js';
+import { formatSampleAlert } from '../src/format.js';
 import { EVENT } from '../src/diff.js';
 import { AVAILABILITY } from '../src/parse.js';
 
@@ -37,7 +37,7 @@ const sample = {
   previous: { availability: AVAILABILITY.FULL, seats: null },
 };
 
-const messages = formatTelegram([sample], { calendarName: 'CEnT-S (TEST)' });
+const messages = formatSampleAlert([sample]);
 
 console.log('Sending this to Telegram:\n');
 console.log(messages.join('\n---\n').replace(/<[^>]+>/g, ''));

@@ -169,7 +169,7 @@ async function checkCalendar(calendar, state, config) {
     // The "armed" message is itself proof of life; don't follow it with a heartbeat.
     state.lastHeartbeatAt = new Date().toISOString();
   } else if (alerts.length > 0) {
-    await notify(formatTelegram(alerts, { calendarName: name }), {
+    await notify(formatTelegram(alerts), {
       emailPayload: formatEmail(alerts, { calendarName: name }),
     });
   }
