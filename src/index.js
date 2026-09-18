@@ -23,6 +23,7 @@ import {
   formatTelegram,
   formatEmail,
   formatHeartbeat,
+  formatArmed,
   formatFailureWarning,
 } from './format.js';
 import { sendTelegram, telegramConfigured } from './notify/telegram.js';
@@ -136,9 +137,11 @@ async function checkCalendar(calendar, state, config) {
   if (knownCount > 0 && rows.length < knownCount * CLIFF_RATIO) {
     log(`SUSPICIOUS: row count fell from ${knownCount} to ${rows.length}; not updating baseline`);
     const warning =
-      `<b>⚠️ Unexpected calendar shrink</b>\n` +
-      `${name}: ${knownCount} → ${rows.length} rows. ` +
-      `Baseline left untouched; check the page manually.`;
+      `\u{1F914} <b>That looks odd</b>\n` +
+      `<i>The ${name} calendar suddenly got much smaller.</i>\n\n` +
+      `\u{1F4C9}  ${knownCount} sessions → only ${rows.length}\n\n` +
+      `\u{1F6E1}\u{FE0F} <i>I have left my notes untouched rather than trust that. ` +
+      `Worth opening the site yourself to check.</i>`;
     await notify(warning).catch((e) => log(`could not deliver shrink warning: ${e.message}`));
     return { ok: true, rows, alerted: false };
   }
@@ -155,13 +158,14 @@ async function checkCalendar(calendar, state, config) {
   if (seeded) {
     const mine = rows.filter((r) => matchesFilter(r, config.filter));
     log(`${name}: first run - adopting ${rows.length} rows as the baseline, staying quiet`);
-    const armed =
-      `<b>✅ Watcher armed</b>\n` +
-      `${name}: baseline set from ${rows.length} sessions.\n` +
-      `Matching your filter: ${mine.filter(isAvailable).length} bookable now, ` +
-      `${mine.filter(isPending).length} still live (sold out or not yet open).\n` +
-      `You will be pinged when any of them turns green.`;
-    await notify(armed);
+    await notify(
+      formatArmed({
+        calendarName: name,
+        tracked: rows.filter((r) => !isExpired(r)).length,
+        bookable: mine.filter(isAvailable).length,
+        pending: mine.filter(isPending).length,
+      }),
+    );
     // The "armed" message is itself proof of life; don't follow it with a heartbeat.
     state.lastHeartbeatAt = new Date().toISOString();
   } else if (alerts.length > 0) {

@@ -4,77 +4,177 @@
  * Telegram is sent with parse_mode=HTML rather than MarkdownV2: university
  * names are full of apostrophes, dashes and dots that MarkdownV2 requires
  * escaping individually, whereas HTML only needs & < >.
+ *
+ * Telegram HTML supports only a small tag set (b, i, u, s, a, code, pre,
+ * blockquote) and no layout control, so structure comes from emoji labels,
+ * blank lines and dividers rather than from markup.
  */
 
 import { EVENT } from './diff.js';
-import { AVAILABILITY } from './parse.js';
+import { AVAILABILITY, toISODate } from './parse.js';
 
 const TELEGRAM_LIMIT = 4096;
 const BOOKING_URL = 'https://testcisia.it/studenti_tolc/login_sso.php';
+const DIVIDER = '━━━━━━━━━━━━━';
 
 export function escapeHtml(text) {
   return String(text ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-const HEADLINE = {
-  [EVENT.BECAME_AVAILABLE]: '\u{1F7E2} SEAT FREED UP',
-  [EVENT.NEW_ROW_AVAILABLE]: '\u{1F195} NEW SESSION, BOOKABLE NOW',
-  [EVENT.NEW_ROW_PENDING]: '\u{1F7E1} SESSION FOUND — BOOKINGS NOT OPEN YET',
-  [EVENT.SEATS_INCREASED]: '\u{1F4C8} MORE SEATS',
-  [EVENT.RUNNING_LOW]: '\u{1F534} SEATS RUNNING OUT',
-  [EVENT.NEW_DATE]: '\u{1F4C5} NEW TEST DATE',
-  [EVENT.BECAME_UNAVAILABLE]: '\u{26AA} SEATS GONE',
-};
-
-/** Short human label for an availability class. */
-const AVAILABILITY_LABEL = {
-  [AVAILABILITY.OPEN]: 'bookings open',
-  [AVAILABILITY.OPEN_LIMITED]: 'open — few seats left',
-  [AVAILABILITY.FULL]: 'sold out',
-  [AVAILABILITY.NOT_OPEN]: 'bookings not opened yet',
-  [AVAILABILITY.EXPIRED]: 'deadline passed',
-};
-
-function seatPhrase(event) {
-  const { row, previous, type } = event;
-  if (type === EVENT.SEATS_INCREASED && previous?.seats != null) {
-    return `${previous.seats} → ${row.seats} seats`;
-  }
-  if (row.seats == null) return AVAILABILITY_LABEL[row.availability] ?? 'status unknown';
-  const suffix = row.availability === AVAILABILITY.OPEN_LIMITED ? ' left — hurry' : ' seats';
-  return `${row.seats}${suffix}`;
+/** "BRESCIA, LOMBARDIA" reads as shouting; soften it to "Brescia, Lombardia". */
+export function titleCase(text) {
+  return String(text ?? '')
+    .toLocaleLowerCase('it-IT')
+    .replace(/(^|[\s'\-/(])([\p{L}])/gu, (_, before, letter) => before + letter.toLocaleUpperCase('it-IT'));
 }
 
-/** One event -> a few lines of HTML. */
-function renderEvent(event) {
-  const head = HEADLINE[event.type] ?? event.type;
+/** "15/10/2026" -> "Thu 15 Oct 2026". Falls back to the raw string. */
+export function humanDate(ddmmyyyy) {
+  const iso = toISODate(ddmmyyyy);
+  if (!iso) return ddmmyyyy ?? '';
+  const date = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return ddmmyyyy;
+  return date.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+}
 
+/** Whole days from today until a DD/MM/YYYY date, or null if unparseable. */
+export function daysUntil(ddmmyyyy, now = new Date()) {
+  const iso = toISODate(ddmmyyyy);
+  if (!iso) return null;
+  const target = Date.parse(`${iso}T00:00:00Z`);
+  if (Number.isNaN(target)) return null;
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Math.round((target - today) / 86_400_000);
+}
+
+/** "Book by Fri 9 Oct 2026 (21 days left)" - urgency people can feel. */
+function deadlinePhrase(deadline) {
+  const days = daysUntil(deadline);
+  const when = escapeHtml(humanDate(deadline));
+  if (days == null) return `Book by ${when}`;
+  if (days < 0) return `Deadline passed (${when})`;
+  if (days === 0) return `<b>Closes TODAY</b> (${when})`;
+  if (days === 1) return `<b>Closes TOMORROW</b> (${when})`;
+  if (days <= 7) return `Book by ${when} — <b>only ${days} days left</b>`;
+  return `Book by ${when} (${days} days left)`;
+}
+
+const FORMAT_LABEL = {
+  'CENT@HOME': '\u{1F3E0}  From home',
+  'CENT@UNI': '\u{1F3DB}\u{FE0F}  In person',
+  'TOLC@CASA': '\u{1F3E0}  From home',
+  'TOLC@UNI': '\u{1F3DB}\u{FE0F}  In person',
+};
+
+function formatLine(row) {
+  const label = FORMAT_LABEL[row.format] ?? `\u{1F4CD}  ${escapeHtml(row.format)}`;
+  return `${label} <i>(${escapeHtml(row.format)})</i>`;
+}
+
+function seatLine(event) {
+  const { row, previous, type } = event;
+
+  if (type === EVENT.SEATS_INCREASED && previous?.seats != null) {
+    const gained = row.seats - previous.seats;
+    return `\u{1F4BA}  <b>${row.seats} seats</b> now — ${gained} more than before`;
+  }
+  if (row.availability === AVAILABILITY.OPEN_LIMITED) {
+    return `\u{1F525}  <b>Only ${row.seats} left!</b>`;
+  }
+  if (row.seats != null) {
+    return `\u{1F4BA}  <b>${row.seats} seats</b> available`;
+  }
+  if (row.availability === AVAILABILITY.NOT_OPEN) {
+    return `\u{1F512}  Bookings haven't opened yet`;
+  }
+  return `\u{1F6AB}  Fully booked right now`;
+}
+
+/** Headline and the human line under it, per event type. */
+const VOICE = {
+  [EVENT.BECAME_AVAILABLE]: {
+    title: '\u{1F389} <b>A SEAT JUST OPENED UP!</b>',
+    subtitle: 'Someone cancelled — this is your chance.',
+    footer: '⚡ <i>Seats like this can vanish in minutes. Go now!</i>',
+  },
+  [EVENT.NEW_ROW_AVAILABLE]: {
+    title: '✨ <b>NEW SESSION — BOOKABLE NOW!</b>',
+    subtitle: 'A new session just appeared, and you can book it.',
+    footer: '⚡ <i>Get in early while there is plenty of room.</i>',
+  },
+  [EVENT.RUNNING_LOW]: {
+    title: '\u{1F525} <b>SEATS RUNNING OUT</b>',
+    subtitle: 'This one is nearly full now.',
+    footer: '⏳ <i>If you want it, do not sleep on it.</i>',
+  },
+  [EVENT.SEATS_INCREASED]: {
+    title: '\u{1F4C8} <b>MORE SEATS APPEARED</b>',
+    subtitle: 'A few people dropped out.',
+    footer: '\u{1F44D} <i>Better odds than a moment ago.</i>',
+  },
+  [EVENT.NEW_ROW_PENDING]: {
+    title: '\u{1F440} <b>NEW SESSION SPOTTED</b>',
+    subtitle: 'It exists, but bookings are not open yet.',
+    footer: '\u{1F514} <i>Nothing to do yet — I will ping you the second it opens.</i>',
+  },
+  [EVENT.BECAME_UNAVAILABLE]: {
+    title: '\u{1F614} <b>SEATS GONE</b>',
+    subtitle: 'Someone got there first.',
+    footer: '\u{1F440} <i>Still watching — it can open up again.</i>',
+  },
+};
+
+/** One event -> a readable block. */
+function renderEvent(event) {
   if (event.type === EVENT.NEW_DATE) {
-    const lines = event.rows.slice(0, 10).map((r) => {
-      const status = AVAILABILITY_LABEL[r.availability] ?? r.label;
-      return `  • ${escapeHtml(r.university)} — ${escapeHtml(r.city)} (${escapeHtml(r.format)}) — ${escapeHtml(status)}`;
-    });
-    if (event.rows.length > 10) lines.push(`  • …and ${event.rows.length - 10} more`);
-    return [`<b>${head} — ${escapeHtml(event.date)}</b>`, ...lines].join('\n');
+    const lines = [
+      `\u{1F4C5} <b>NEW TEST DATE PUBLISHED!</b>`,
+      `<i>A university just added ${escapeHtml(humanDate(event.date))}.</i>`,
+      '',
+    ];
+    for (const row of event.rows.slice(0, 8)) {
+      const status =
+        row.availability === AVAILABILITY.OPEN || row.availability === AVAILABILITY.OPEN_LIMITED
+          ? '✅ bookable'
+          : row.availability === AVAILABILITY.NOT_OPEN
+            ? '\u{1F512} not open yet'
+            : '\u{1F6AB} full';
+      lines.push(`   • ${escapeHtml(titleCase(row.city))} — ${escapeHtml(row.university)}  ${status}`);
+    }
+    if (event.rows.length > 8) lines.push(`   • <i>…and ${event.rows.length - 8} more</i>`);
+    lines.push('', `\u{1F440} <i>I will tell you the moment one of these opens.</i>`);
+    return lines.join('\n');
   }
 
   const row = event.row;
-  const lines = [
-    `<b>${head}</b>`,
-    `<b>${escapeHtml(row.date)}</b> — ${escapeHtml(row.format)}`,
-    `${escapeHtml(row.university)}`,
-    `${escapeHtml(row.city)}, ${escapeHtml(row.region)}`,
-    `${escapeHtml(seatPhrase(event))} · book by ${escapeHtml(row.deadline)}`,
-  ];
+  const voice = VOICE[event.type] ?? { title: `<b>${event.type}</b>`, subtitle: '', footer: '' };
 
-  // A session whose bookings have not opened cannot be booked yet, so point at
-  // the calendar to watch rather than at a login that will not help.
-  if (event.type === EVENT.NEW_ROW_PENDING) {
-    lines.push('<i>Not bookable yet — you will be alerted the moment it opens.</i>');
-  } else {
-    lines.push(`<a href="${escapeHtml(row.bookingUrl || BOOKING_URL)}">Book now</a>`);
+  const lines = [voice.title];
+  if (voice.subtitle) lines.push(`<i>${voice.subtitle}</i>`);
+  lines.push(
+    '',
+    `\u{1F4C5}  <b>${escapeHtml(humanDate(row.date))}</b>`,
+    formatLine(row),
+    `\u{1F3DB}\u{FE0F}  ${escapeHtml(row.university)}`,
+    `\u{1F4CD}  ${escapeHtml(titleCase(row.city))}, ${escapeHtml(titleCase(row.region))}`,
+    seatLine(event),
+    `⏰  ${deadlinePhrase(row.deadline)}`,
+    '',
+  );
+
+  // A session whose bookings have not opened cannot be booked yet, so a login
+  // link would only send them somewhere useless.
+  if (event.type !== EVENT.NEW_ROW_PENDING && event.type !== EVENT.BECAME_UNAVAILABLE) {
+    lines.push(`\u{1F449} <a href="${escapeHtml(row.bookingUrl || BOOKING_URL)}"><b>BOOK IT NOW</b></a>`, '');
   }
 
+  if (voice.footer) lines.push(voice.footer);
   return lines.join('\n');
 }
 
@@ -98,13 +198,12 @@ export function sortByUrgency(events) {
  */
 export function formatTelegram(events, { calendarName = 'CEnT-S' } = {}) {
   if (events.length === 0) return [];
-  const header = `<b>${escapeHtml(calendarName)} calendar update</b>`;
   const blocks = sortByUrgency(events).map(renderEvent);
 
   const messages = [];
-  let current = header;
-  for (const block of blocks) {
-    const candidate = `${current}\n\n${block}`;
+  let current = blocks[0];
+  for (const block of blocks.slice(1)) {
+    const candidate = `${current}\n\n${DIVIDER}\n\n${block}`;
     if (candidate.length > TELEGRAM_LIMIT) {
       messages.push(current);
       current = block;
@@ -121,57 +220,88 @@ export function formatEmail(events, { calendarName = 'CEnT-S' } = {}) {
     (e) => e.type === EVENT.BECAME_AVAILABLE || e.type === EVENT.NEW_ROW_AVAILABLE,
   ).length;
   const subject = urgent > 0
-    ? `[${calendarName}] ${urgent} seat${urgent === 1 ? '' : 's'} available now`
+    ? `\u{1F389} [${calendarName}] ${urgent} seat${urgent === 1 ? '' : 's'} available now!`
     : `[${calendarName}] ${events.length} calendar change${events.length === 1 ? '' : 's'}`;
-  const body = sortByUrgency(events).map(renderEvent).join('\n\n');
+  const body = sortByUrgency(events).map(renderEvent).join(`\n\n${DIVIDER}\n\n`);
   return {
     subject,
-    html: `<div style="font-family:system-ui,sans-serif;white-space:pre-wrap">${body}</div>`,
+    html: `<div style="font-family:system-ui,sans-serif;white-space:pre-wrap;line-height:1.6">${body}</div>`,
     text: body.replace(/<a href="([^"]+)">[^<]*<\/a>/g, '$1').replace(/<[^>]+>/g, ''),
   };
 }
 
-/** Max watchlist entries in a heartbeat, so the message stays glanceable. */
 const WATCHLIST_LIMIT = 8;
 
-/**
- * `watchlist` entries are the filtered sessions that are still in play, each
- * optionally carrying the last seat count observed while it was bookable -
- * CISIA never publishes a count for a sold-out session, so this is the only
- * way to show one.
- */
+const WATCHLIST_ICON = {
+  [AVAILABILITY.OPEN]: '✅',
+  [AVAILABILITY.OPEN_LIMITED]: '\u{1F525}',
+  [AVAILABILITY.FULL]: '\u{1F6AB}',
+  [AVAILABILITY.NOT_OPEN]: '\u{1F512}',
+};
+
+const WATCHLIST_WORD = {
+  [AVAILABILITY.OPEN]: 'bookable now',
+  [AVAILABILITY.OPEN_LIMITED]: 'almost full',
+  [AVAILABILITY.FULL]: 'fully booked',
+  [AVAILABILITY.NOT_OPEN]: 'not open yet',
+};
+
 export function formatHeartbeat({ calendarName, tracked, available, pending, matching, watchlist = [] }) {
   const lines = [
-    `<b>\u{1F493} Watcher alive</b>`,
-    `${escapeHtml(calendarName)}: ${tracked} live sessions tracked.`,
-    `${available} bookable now, ${pending} waiting to open or sold out.`,
-    `${matching} bookable session(s) match your filter.`,
+    `\u{1F49A} <b>Still watching for you</b>`,
+    `<i>Daily check-in from your ${escapeHtml(calendarName)} watcher.</i>`,
+    '',
+    `\u{1F441}\u{FE0F}  Tracking <b>${tracked}</b> sessions`,
+    `✅  <b>${available}</b> bookable right now`,
+    `⏳  <b>${pending}</b> waiting to open or fully booked`,
   ];
 
   if (watchlist.length > 0) {
-    lines.push('', '<b>Your watchlist</b>');
+    lines.push('', `\u{1F4CB} <b>Your sessions</b>`);
     for (const item of watchlist.slice(0, WATCHLIST_LIMIT)) {
+      const icon = WATCHLIST_ICON[item.availability] ?? '•';
+      const word = WATCHLIST_WORD[item.availability] ?? item.availability;
       const history =
-        item.lastSeats != null
-          ? ` · had ${item.lastSeats} seat(s) on ${escapeHtml(item.lastSeatsOn)}`
+        item.lastSeats != null && item.availability !== AVAILABILITY.OPEN
+          ? ` <i>(had ${item.lastSeats} seats on ${escapeHtml(item.lastSeatsOn)})</i>`
           : '';
-      const status = AVAILABILITY_LABEL[item.availability] ?? item.availability;
-      lines.push(`  • ${escapeHtml(item.date)} ${escapeHtml(item.city)} — ${escapeHtml(status)}${history}`);
+      lines.push(`   ${icon}  ${escapeHtml(titleCase(item.city))} — ${escapeHtml(humanDate(item.date))} — ${word}${history}`);
     }
     if (watchlist.length > WATCHLIST_LIMIT) {
-      lines.push(`  • …and ${watchlist.length - WATCHLIST_LIMIT} more`);
+      lines.push(`   •  <i>…and ${watchlist.length - WATCHLIST_LIMIT} more</i>`);
     }
   }
 
-  lines.push('', `No news is good news — you will be pinged the moment that changes.`);
+  lines.push(
+    '',
+    matching > 0
+      ? `\u{1F389} <b>${matching} of your sessions can be booked right now!</b>`
+      : `\u{1F634} Nothing free yet — but I am not going anywhere.`,
+  );
   return lines.join('\n');
+}
+
+export function formatArmed({ calendarName, tracked, bookable, pending }) {
+  return [
+    `\u{1F680} <b>Watcher is live!</b>`,
+    `<i>I am now watching the ${escapeHtml(calendarName)} calendar for you, day and night.</i>`,
+    '',
+    `\u{1F441}\u{FE0F}  Tracking <b>${tracked}</b> sessions`,
+    `✅  <b>${bookable}</b> of yours bookable now`,
+    `⏳  <b>${pending}</b> of yours still in play`,
+    '',
+    `\u{1F4A4} <i>Go to sleep — I will wake you if a seat opens.</i>`,
+  ].join('\n');
 }
 
 export function formatFailureWarning(calendarName, failures, lastError) {
   return [
-    `<b>\u{26A0}\u{FE0F} Watcher is failing</b>`,
-    `${escapeHtml(calendarName)}: ${failures} consecutive failed checks.`,
-    `Last error: ${escapeHtml(lastError)}`,
-    `The site may be down or its page layout may have changed.`,
+    `⚠\u{FE0F} <b>Something is wrong with me</b>`,
+    `<i>I could not check the ${escapeHtml(calendarName)} calendar.</i>`,
+    '',
+    `❌  <b>${failures}</b> failed checks in a row`,
+    `\u{1F4AC}  ${escapeHtml(lastError)}`,
+    '',
+    `\u{1F527} <i>The site may be down, or its page may have changed. Worth a look.</i>`,
   ].join('\n');
 }
