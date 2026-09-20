@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-20T17:46:20.966Z",
+  "updatedAt": "2026-09-20T19:47:26.826Z",
   "lastHeartbeatAt": "2026-09-20T11:40:34.068Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -25,8 +25,8 @@
           "lastSeatsOn": "2026-09-20"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
-          "availability": "OPEN_LIMITED",
-          "seats": 1,
+          "availability": "FULL",
+          "seats": null,
           "lastSeats": 1,
           "lastSeatsOn": "2026-09-20"
         },
