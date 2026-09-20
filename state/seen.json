@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-20T11:40:34.068Z",
+  "updatedAt": "2026-09-20T14:53:07.511Z",
   "lastHeartbeatAt": "2026-09-20T11:40:34.068Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -26,8 +26,8 @@
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
           "availability": "OPEN_LIMITED",
-          "seats": 2,
-          "lastSeats": 2,
+          "seats": 1,
+          "lastSeats": 1,
           "lastSeatsOn": "2026-09-20"
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|15/10/2026": {
