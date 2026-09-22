@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-21T22:25:21.819Z",
+  "updatedAt": "2026-09-22T00:57:53.387Z",
   "lastHeartbeatAt": "2026-09-21T13:51:27.683Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -16,13 +16,13 @@
           "availability": "OPEN",
           "seats": 46,
           "lastSeats": 46,
-          "lastSeatsOn": "2026-09-21"
+          "lastSeatsOn": "2026-09-22"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Ingegneria (I3S) - Dipartimento di Scienze statistiche|ROMA|15/10/2026": {
           "availability": "OPEN",
           "seats": 12,
           "lastSeats": 12,
-          "lastSeatsOn": "2026-09-21"
+          "lastSeatsOn": "2026-09-22"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
           "availability": "FULL",
@@ -64,7 +64,7 @@
           "availability": "OPEN",
           "seats": 44,
           "lastSeats": 44,
-          "lastSeatsOn": "2026-09-21"
+          "lastSeatsOn": "2026-09-22"
         }
       },
       "dates": [
