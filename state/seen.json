@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-22T18:29:13.997Z",
+  "updatedAt": "2026-09-22T21:34:59.049Z",
   "lastHeartbeatAt": "2026-09-22T14:59:32.747Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -14,8 +14,8 @@
         },
         "CENT@UNI|Universita' di Siena - Economia|SIENA|15/10/2026": {
           "availability": "OPEN",
-          "seats": 46,
-          "lastSeats": 46,
+          "seats": 45,
+          "lastSeats": 45,
           "lastSeatsOn": "2026-09-22"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Ingegneria (I3S) - Dipartimento di Scienze statistiche|ROMA|15/10/2026": {
