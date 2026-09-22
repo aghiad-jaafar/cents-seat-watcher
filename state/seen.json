@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-22T05:36:05.690Z",
+  "updatedAt": "2026-09-22T10:18:35.563Z",
   "lastHeartbeatAt": "2026-09-21T13:51:27.683Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -62,8 +62,8 @@
         },
         "CENT@UNI|Università degli studi di Udine|UDINE|15/10/2026": {
           "availability": "OPEN",
-          "seats": 44,
-          "lastSeats": 44,
+          "seats": 43,
+          "lastSeats": 43,
           "lastSeatsOn": "2026-09-22"
         }
       },
