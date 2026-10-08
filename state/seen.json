@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-08T09:31:25.817Z",
+  "updatedAt": "2026-10-08T16:50:06.712Z",
   "lastHeartbeatAt": "2026-10-08T02:46:43.705Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -12,10 +12,16 @@
           "lastSeats": null,
           "lastSeatsOn": null
         },
+        "CENT@UNI|Universita' degli studi di Padova|PADOVA|15/10/2026": {
+          "availability": "OPEN",
+          "seats": 30,
+          "lastSeats": 30,
+          "lastSeatsOn": "2026-10-08"
+        },
         "CENT@UNI|Universita' di Siena - Economia|SIENA|15/10/2026": {
           "availability": "OPEN",
-          "seats": 22,
-          "lastSeats": 22,
+          "seats": 24,
+          "lastSeats": 24,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Ingegneria (I3S) - Dipartimento di Scienze statistiche|ROMA|15/10/2026": {
@@ -26,8 +32,8 @@
         },
         "CENT@UNI|Universita' degli studi di Trieste|TRIESTE|15/10/2026": {
           "availability": "OPEN",
-          "seats": 111,
-          "lastSeats": 111,
+          "seats": 108,
+          "lastSeats": 108,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
@@ -55,10 +61,10 @@
           "lastSeatsOn": null
         },
         "CENT@HOME|Università degli studi di Padova|PADOVA|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
-          "lastSeats": 15,
-          "lastSeatsOn": "2026-10-07"
+          "availability": "OPEN",
+          "seats": 46,
+          "lastSeats": 46,
+          "lastSeatsOn": "2026-10-08"
         },
         "CENT@HOME|Università degli studi di Milano Bicocca|MILANO|15/10/2026": {
           "availability": "FULL",
@@ -73,10 +79,10 @@
           "lastSeatsOn": null
         },
         "CENT@HOME|Università degli studi di Teramo|TERAMO|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
-          "lastSeats": null,
-          "lastSeatsOn": null
+          "availability": "OPEN_LIMITED",
+          "seats": 1,
+          "lastSeats": 1,
+          "lastSeatsOn": "2026-10-08"
         },
         "CENT@UNI|Università degli studi di Udine|UDINE|15/10/2026": {
           "availability": "OPEN",
