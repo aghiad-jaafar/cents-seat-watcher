@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-08T16:50:06.712Z",
+  "updatedAt": "2026-10-08T21:36:00.780Z",
   "lastHeartbeatAt": "2026-10-08T02:46:43.705Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -14,8 +14,8 @@
         },
         "CENT@UNI|Universita' degli studi di Padova|PADOVA|15/10/2026": {
           "availability": "OPEN",
-          "seats": 30,
-          "lastSeats": 30,
+          "seats": 29,
+          "lastSeats": 29,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@UNI|Universita' di Siena - Economia|SIENA|15/10/2026": {
@@ -32,14 +32,14 @@
         },
         "CENT@UNI|Universita' degli studi di Trieste|TRIESTE|15/10/2026": {
           "availability": "OPEN",
-          "seats": 108,
-          "lastSeats": 108,
+          "seats": 107,
+          "lastSeats": 107,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
           "availability": "OPEN_LIMITED",
-          "seats": 1,
-          "lastSeats": 1,
+          "seats": 2,
+          "lastSeats": 2,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|15/10/2026": {
@@ -62,15 +62,15 @@
         },
         "CENT@HOME|Università degli studi di Padova|PADOVA|15/10/2026": {
           "availability": "OPEN",
-          "seats": 46,
-          "lastSeats": 46,
+          "seats": 32,
+          "lastSeats": 32,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@HOME|Università degli studi di Milano Bicocca|MILANO|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
-          "lastSeats": null,
-          "lastSeatsOn": null
+          "availability": "OPEN_LIMITED",
+          "seats": 1,
+          "lastSeats": 1,
+          "lastSeatsOn": "2026-10-08"
         },
         "CENT@HOME|Università degli studi di Brescia|BRESCIA|15/10/2026": {
           "availability": "FULL",
@@ -79,8 +79,8 @@
           "lastSeatsOn": null
         },
         "CENT@HOME|Università degli studi di Teramo|TERAMO|15/10/2026": {
-          "availability": "OPEN_LIMITED",
-          "seats": 1,
+          "availability": "FULL",
+          "seats": null,
           "lastSeats": 1,
           "lastSeatsOn": "2026-10-08"
         },
