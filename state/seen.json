@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-09T01:24:51.016Z",
-  "lastHeartbeatAt": "2026-10-08T02:46:43.705Z",
+  "updatedAt": "2026-10-09T07:32:36.212Z",
+  "lastHeartbeatAt": "2026-10-09T07:32:36.212Z",
   "consecutiveFailures": 0,
   "calendars": {
     "CEnT-S": {
@@ -20,8 +20,8 @@
         },
         "CENT@UNI|Universita' di Siena - Economia|SIENA|15/10/2026": {
           "availability": "OPEN",
-          "seats": 24,
-          "lastSeats": 24,
+          "seats": 25,
+          "lastSeats": 25,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Ingegneria (I3S) - Dipartimento di Scienze statistiche|ROMA|15/10/2026": {
@@ -32,8 +32,8 @@
         },
         "CENT@UNI|Universita' degli studi di Trieste|TRIESTE|15/10/2026": {
           "availability": "OPEN",
-          "seats": 107,
-          "lastSeats": 107,
+          "seats": 106,
+          "lastSeats": 106,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
@@ -62,8 +62,8 @@
         },
         "CENT@HOME|Università degli studi di Padova|PADOVA|15/10/2026": {
           "availability": "OPEN",
-          "seats": 26,
-          "lastSeats": 26,
+          "seats": 11,
+          "lastSeats": 11,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@HOME|Università degli studi di Milano Bicocca|MILANO|15/10/2026": {
