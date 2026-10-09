@@ -1,92 +1,92 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-09T07:32:36.212Z",
+  "updatedAt": "2026-10-09T14:34:28.887Z",
   "lastHeartbeatAt": "2026-10-09T07:32:36.212Z",
   "consecutiveFailures": 0,
   "calendars": {
     "CEnT-S": {
       "rows": {
         "CENT@UNI|Universita' degli studi di Brescia|BRESCIA|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": null,
           "lastSeatsOn": null
         },
         "CENT@UNI|Universita' degli studi di Padova|PADOVA|15/10/2026": {
-          "availability": "OPEN",
-          "seats": 29,
+          "availability": "EXPIRED",
+          "seats": 28,
           "lastSeats": 29,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Universita' di Siena - Economia|SIENA|15/10/2026": {
-          "availability": "OPEN",
+          "availability": "EXPIRED",
           "seats": 25,
           "lastSeats": 25,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Ingegneria (I3S) - Dipartimento di Scienze statistiche|ROMA|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": 3,
           "lastSeatsOn": "2026-09-26"
         },
         "CENT@UNI|Universita' degli studi di Trieste|TRIESTE|15/10/2026": {
-          "availability": "OPEN",
-          "seats": 106,
+          "availability": "EXPIRED",
+          "seats": 103,
           "lastSeats": 106,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
-          "availability": "OPEN_LIMITED",
+          "availability": "EXPIRED",
           "seats": 2,
           "lastSeats": 2,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": null,
           "lastSeatsOn": null
         },
         "CENT@HOME|Università degli studi di Perugia|PERUGIA|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": null,
           "lastSeatsOn": null
         },
         "CENT@HOME|Sapienza Università di Roma|ROMA|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": null,
           "lastSeatsOn": null
         },
         "CENT@HOME|Università degli studi di Padova|PADOVA|15/10/2026": {
-          "availability": "OPEN",
-          "seats": 11,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": 11,
           "lastSeatsOn": "2026-10-09"
         },
         "CENT@HOME|Università degli studi di Milano Bicocca|MILANO|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": 1,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@HOME|Università degli studi di Brescia|BRESCIA|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": null,
           "lastSeatsOn": null
         },
         "CENT@HOME|Università degli studi di Teramo|TERAMO|15/10/2026": {
-          "availability": "FULL",
-          "seats": null,
+          "availability": "EXPIRED",
+          "seats": 0,
           "lastSeats": 1,
           "lastSeatsOn": "2026-10-08"
         },
         "CENT@UNI|Università degli studi di Udine|UDINE|15/10/2026": {
-          "availability": "OPEN",
-          "seats": 12,
+          "availability": "EXPIRED",
+          "seats": 11,
           "lastSeats": 12,
           "lastSeatsOn": "2026-10-09"
         }
