@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-08T21:36:00.780Z",
+  "updatedAt": "2026-10-09T01:24:51.016Z",
   "lastHeartbeatAt": "2026-10-08T02:46:43.705Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -16,13 +16,13 @@
           "availability": "OPEN",
           "seats": 29,
           "lastSeats": 29,
-          "lastSeatsOn": "2026-10-08"
+          "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Universita' di Siena - Economia|SIENA|15/10/2026": {
           "availability": "OPEN",
           "seats": 24,
           "lastSeats": 24,
-          "lastSeatsOn": "2026-10-08"
+          "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Ingegneria (I3S) - Dipartimento di Scienze statistiche|ROMA|15/10/2026": {
           "availability": "FULL",
@@ -34,13 +34,13 @@
           "availability": "OPEN",
           "seats": 107,
           "lastSeats": 107,
-          "lastSeatsOn": "2026-10-08"
+          "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Sapienza Universita' di Roma - Facolta' di Economia|ROMA|15/10/2026": {
           "availability": "OPEN_LIMITED",
           "seats": 2,
           "lastSeats": 2,
-          "lastSeatsOn": "2026-10-08"
+          "lastSeatsOn": "2026-10-09"
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|15/10/2026": {
           "availability": "FULL",
@@ -62,13 +62,13 @@
         },
         "CENT@HOME|Università degli studi di Padova|PADOVA|15/10/2026": {
           "availability": "OPEN",
-          "seats": 32,
-          "lastSeats": 32,
-          "lastSeatsOn": "2026-10-08"
+          "seats": 26,
+          "lastSeats": 26,
+          "lastSeatsOn": "2026-10-09"
         },
         "CENT@HOME|Università degli studi di Milano Bicocca|MILANO|15/10/2026": {
-          "availability": "OPEN_LIMITED",
-          "seats": 1,
+          "availability": "FULL",
+          "seats": null,
           "lastSeats": 1,
           "lastSeatsOn": "2026-10-08"
         },
@@ -88,7 +88,7 @@
           "availability": "OPEN",
           "seats": 12,
           "lastSeats": 12,
-          "lastSeatsOn": "2026-10-08"
+          "lastSeatsOn": "2026-10-09"
         }
       },
       "dates": [
