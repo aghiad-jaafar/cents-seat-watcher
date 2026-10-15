@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-15T10:01:57.210Z",
+  "updatedAt": "2026-10-15T14:44:00.340Z",
   "lastHeartbeatAt": "2026-10-14T19:33:06.151Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -56,7 +56,7 @@
         },
         "CENT@HOME|Sapienza Università di Roma|ROMA|15/10/2026": {
           "availability": "EXPIRED",
-          "seats": 0,
+          "seats": 2,
           "lastSeats": null,
           "lastSeatsOn": null
         },
