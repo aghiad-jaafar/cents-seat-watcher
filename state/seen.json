@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-16T15:35:03.752Z",
+  "updatedAt": "2026-10-16T18:59:58.274Z",
   "lastHeartbeatAt": "2026-10-15T21:47:36.593Z",
-  "consecutiveFailures": 15,
+  "consecutiveFailures": 18,
   "calendars": {
     "CEnT-S": {
       "rows": {
