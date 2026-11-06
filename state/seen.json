@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-11-06T17:12:49.507Z",
+  "updatedAt": "2026-11-06T22:06:43.306Z",
   "lastHeartbeatAt": "2026-11-05T22:55:35.641Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -32,13 +32,13 @@
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|17/12/2026": {
           "availability": "OPEN",
-          "seats": 84,
-          "lastSeats": 84,
+          "seats": 80,
+          "lastSeats": 80,
           "lastSeatsOn": "2026-11-06"
         },
         "CENT@UNI|Politecnico di Torino|TORINO|12/01/2027": {
-          "availability": "OPEN_LIMITED",
-          "seats": 8,
+          "availability": "FULL",
+          "seats": null,
           "lastSeats": 8,
           "lastSeatsOn": "2026-11-06"
         }
