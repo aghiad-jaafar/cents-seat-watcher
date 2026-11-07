@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "updatedAt": "2026-11-06T22:06:43.306Z",
-  "lastHeartbeatAt": "2026-11-05T22:55:35.641Z",
+  "updatedAt": "2026-11-07T01:50:25.323Z",
+  "lastHeartbeatAt": "2026-11-07T01:50:25.323Z",
   "consecutiveFailures": 0,
   "calendars": {
     "CEnT-S": {
@@ -10,7 +10,7 @@
           "availability": "OPEN",
           "seats": 81,
           "lastSeats": 81,
-          "lastSeatsOn": "2026-11-06"
+          "lastSeatsOn": "2026-11-07"
         },
         "CENT@HOME|Sapienza Università di Roma|ROMA|26/11/2026": {
           "availability": "FULL",
@@ -34,7 +34,7 @@
           "availability": "OPEN",
           "seats": 80,
           "lastSeats": 80,
-          "lastSeatsOn": "2026-11-06"
+          "lastSeatsOn": "2026-11-07"
         },
         "CENT@UNI|Politecnico di Torino|TORINO|12/01/2027": {
           "availability": "FULL",
