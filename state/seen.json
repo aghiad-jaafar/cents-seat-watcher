@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-11-08T22:48:53.480Z",
+  "updatedAt": "2026-11-09T02:03:06.722Z",
   "lastHeartbeatAt": "2026-11-08T07:56:44.614Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -10,13 +10,13 @@
           "availability": "OPEN",
           "seats": 146,
           "lastSeats": 146,
-          "lastSeatsOn": "2026-11-08"
+          "lastSeatsOn": "2026-11-09"
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|26/11/2026": {
           "availability": "OPEN",
           "seats": 77,
           "lastSeats": 77,
-          "lastSeatsOn": "2026-11-08"
+          "lastSeatsOn": "2026-11-09"
         },
         "CENT@HOME|Sapienza Università di Roma|ROMA|26/11/2026": {
           "availability": "FULL",
@@ -38,9 +38,9 @@
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|17/12/2026": {
           "availability": "OPEN",
-          "seats": 72,
-          "lastSeats": 72,
-          "lastSeatsOn": "2026-11-08"
+          "seats": 73,
+          "lastSeats": 73,
+          "lastSeatsOn": "2026-11-09"
         },
         "CENT@UNI|Politecnico di Torino|TORINO|12/01/2027": {
           "availability": "FULL",
