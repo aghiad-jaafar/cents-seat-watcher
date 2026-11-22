@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-11-22T15:16:10.463Z",
+  "updatedAt": "2026-11-22T21:06:02.664Z",
   "lastHeartbeatAt": "2026-11-22T00:23:31.157Z",
   "consecutiveFailures": 0,
   "calendars": {
@@ -50,8 +50,8 @@
         },
         "CENT@UNI|Universita' degli studi di Messina|MESSINA|17/12/2026": {
           "availability": "OPEN",
-          "seats": 28,
-          "lastSeats": 28,
+          "seats": 25,
+          "lastSeats": 25,
           "lastSeatsOn": "2026-11-22"
         },
         "CENT@HOME|Sapienza Università di Roma|ROMA|17/12/2026": {
